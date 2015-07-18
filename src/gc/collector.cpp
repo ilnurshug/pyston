@@ -467,11 +467,9 @@ void endGCUnexpectedRegion() {
     should_not_reenter_gc = false;
 }
 
-        #include <cstdio>
-
 void runCollection() {
-    freopen("~/Documents/out.txt","w",stdout);
-    printf("hello\n");
+    FILE *f = fopen("out.txt", "w");
+    fprintf(f, "hello from runCollection\n");
 
     static StatCounter sc_us("us_gc_collections");
     static StatCounter sc("gc_collections");
