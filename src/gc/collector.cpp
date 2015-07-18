@@ -466,11 +466,12 @@ void endGCUnexpectedRegion() {
     RELEASE_ASSERT(should_not_reenter_gc, "");
     should_not_reenter_gc = false;
 }
-        #include <fstream>
+
+        #include <cstdio>
 
 void runCollection() {
-    fstream cout("~/Documents/out.txt");
-    cout << "runCollection";
+    freopen("~/Documents/out.txt","w",stdout);
+    printf("hello\n");
 
     static StatCounter sc_us("us_gc_collections");
     static StatCounter sc("gc_collections");
