@@ -21,6 +21,7 @@ namespace pyston {
 
     class gc::GCBase {
     public:
+        virtual ~GCBase() {}
         virtual void *gc_alloc(size_t bytes, GCKind kind_id) __attribute__((visibility("default"))) = 0;
         virtual void* gc_realloc(void* ptr, size_t bytes) __attribute__((visibility("default"))) = 0;
         virtual void gc_free(void* ptr) __attribute__((visibility("default"))) = 0;

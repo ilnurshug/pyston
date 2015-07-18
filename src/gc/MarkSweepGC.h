@@ -25,6 +25,7 @@ namespace pyston{
         MarkSweepGC() {
             gc_enabled = true;
         }
+        virtual ~MarkSweepGC() {}
 
         virtual void *gc_alloc(size_t bytes, GCKind kind_id) override;
 
