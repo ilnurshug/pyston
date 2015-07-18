@@ -468,7 +468,7 @@ void endGCUnexpectedRegion() {
 }
 
 void runCollection() {
-    FILE *f = fopen("out.txt", "w");
+    FILE *f = fopen("out.txt", "a");
     fprintf(f, "hello from runCollection\n");
 
     static StatCounter sc_us("us_gc_collections");
