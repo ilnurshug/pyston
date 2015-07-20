@@ -14,21 +14,6 @@
 
 #include "gc/collector.h"
 
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-
-#include "codegen/ast_interpreter.h"
-#include "codegen/codegen.h"
-#include "core/common.h"
-#include "core/threading.h"
-#include "core/types.h"
-#include "core/util.h"
-#include "gc/heap.h"
-#include "runtime/objmodel.h"
-#include "runtime/types.h"
-
-
 
 #ifndef NVALGRIND
 #include "valgrind.h"
@@ -218,12 +203,7 @@ void registerPythonObject(Box* b) {
     }
 }
 
-GCRootHandle::GCRootHandle() {
-    getRootHandles()->insert(this);
-}
-GCRootHandle::~GCRootHandle() {
-    getRootHandles()->erase(this);
-}
+
 
 bool GCVisitor::isValid(void* p) {
     return GC.global_heap.getAllocationFromInteriorPointer(p) != NULL;

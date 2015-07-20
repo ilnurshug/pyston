@@ -10,10 +10,19 @@
 #include <list>
 #include <sys/mman.h>
 
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+
+#include "codegen/ast_interpreter.h"
+#include "codegen/codegen.h"
 #include "core/common.h"
 #include "core/threading.h"
 #include "core/types.h"
+#include "core/util.h"
 #include "gc/heap.h"
+#include "runtime/objmodel.h"
+#include "runtime/types.h"
 
 namespace pyston {
     namespace gc {
@@ -41,8 +50,8 @@ namespace pyston {
     public:
         Box* value;
 
-        GCRootHandle();
-        ~GCRootHandle();
+        GCRootHandle() { gc::getRootHandles()->insert(this); }
+        ~GCRootHandle() { gc :: getRootHandles()->erase(this); };
 
         void operator=(Box* b) { value = b; }
 
@@ -105,7 +114,7 @@ namespace pyston {
                 // An arbitrary amount of stuff can happen between the 'new' and
                 // the call to the constructor (ie the args get evaluated), which
                 // can trigger a collection.
-                        ASSERT(cls->gc_visit, "%s", getTypeName(b));
+                ASSERT(cls->gc_visit, "%s", getTypeName(b));
                 cls->gc_visit(&visitor, b);
             }
         } else if (kind_id == GCKind::HIDDEN_CLASS) {
