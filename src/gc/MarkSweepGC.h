@@ -5,8 +5,7 @@
 #ifndef PYSTON_MARKSWEEPGC_H
 #define PYSTON_MARKSWEEPGC_H
 
-#include "gc_base.h"
-#include "gc/heap.h"
+#include "gc/gc_base.h"
 #include "runtime/objmodel.h"
 #include "runtime/types.h"
 
@@ -24,6 +23,8 @@ namespace pyston{
     public:
         MarkSweepGC() {
             gc_enabled = true;
+            should_not_reenter_gc = false;
+            ncollections = 0;
         }
         virtual ~MarkSweepGC() {}
 
@@ -41,12 +42,18 @@ namespace pyston{
 
         virtual void enableGC() override;
 
+
+
     private:
+
         void markPhase();
 
         void sweepPhase(std::vector<Box*>& weakly_referenced);
 
-        Heap global_heap;
+
+
+        bool should_not_reenter_gc;
+        int ncollections;
     };
 }
 

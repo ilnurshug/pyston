@@ -597,7 +597,7 @@ public:
     void dumpHeapStatistics(int level);
 };
 
-extern Heap global_heap;
+//extern Heap global_heap;
 void dumpHeapStatistics(int level);
 
 } // namespace gc

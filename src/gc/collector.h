@@ -19,16 +19,13 @@
 
 #include "core/types.h"
 
+#include "gc/MarkSweepGC.h"
+
 namespace pyston {
 namespace gc {
+    MarkSweepGC GC;
 
-#define TRACE_GC_MARKING 0
-#if TRACE_GC_MARKING
-extern FILE* trace_fp;
-#define GC_TRACE_LOG(...) fprintf(pyston::gc::trace_fp, __VA_ARGS__)
-#else
-#define GC_TRACE_LOG(...)
-#endif
+
 
 // Mark this gc-allocated object as being a root, even if there are no visible references to it.
 // (Note: this marks the gc allocation itself, not the pointer that points to one.  For that, use
@@ -44,19 +41,6 @@ void registerNonheapRootObject(void* obj, int size);
 
 void registerPotentialRootRange(void* start, void* end);
 
-// If you want to have a static root "location" where multiple values could be stored, use this:
-class GCRootHandle {
-public:
-    Box* value;
-
-    GCRootHandle();
-    ~GCRootHandle();
-
-    void operator=(Box* b) { value = b; }
-
-    operator Box*() { return value; }
-    Box* operator->() { return value; }
-};
 
 void runCollection();
 
