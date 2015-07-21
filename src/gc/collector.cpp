@@ -42,90 +42,6 @@ static void* min_nonheap_root = (void*)~0;
 
 static bool should_not_reenter_gc = false;
 
-class TraceStack {
-private:
-    const int CHUNK_SIZE = 256;
-    const int MAX_FREE_CHUNKS = 50;
-
-    std::vector<void**> chunks;
-    static std::vector<void**> free_chunks;
-
-    void** cur;
-    void** start;
-    void** end;
-
-    void get_chunk() {
-        if (free_chunks.size()) {
-            start = free_chunks.back();
-            free_chunks.pop_back();
-        } else {
-            start = (void**)malloc(sizeof(void*) * CHUNK_SIZE);
-        }
-
-        cur = start;
-        end = start + CHUNK_SIZE;
-    }
-    void release_chunk(void** chunk) {
-        if (free_chunks.size() == MAX_FREE_CHUNKS)
-            free(chunk);
-        else
-            free_chunks.push_back(chunk);
-    }
-    void pop_chunk() {
-        start = chunks.back();
-        chunks.pop_back();
-        end = start + CHUNK_SIZE;
-        cur = end;
-    }
-
-public:
-    TraceStack() { get_chunk(); }
-    TraceStack(const std::unordered_set<void*>& rhs) {
-        get_chunk();
-        for (void* p : rhs) {
-            assert(!isMarked(GCAllocation::fromUserData(p)));
-            push(p);
-        }
-    }
-
-    void push(void* p) {
-        GC_TRACE_LOG("Pushing %p\n", p);
-        GCAllocation* al = GCAllocation::fromUserData(p);
-        if (isMarked(al))
-            return;
-
-        setMark(al);
-
-        *cur++ = p;
-        if (cur == end) {
-            chunks.push_back(start);
-            get_chunk();
-        }
-    }
-
-    void* pop_chunk_and_item() {
-        release_chunk(start);
-        if (chunks.size()) {
-            pop_chunk();
-            assert(cur == end);
-            return *--cur; // no need for any bounds checks here since we're guaranteed we're CHUNK_SIZE from the start
-        } else {
-            // We emptied the stack, but we should prepare a new chunk in case another item
-            // gets added onto the stack.
-            get_chunk();
-            return NULL;
-        }
-    }
-
-
-    void* pop() {
-        if (cur > start)
-            return *--cur;
-
-        return pop_chunk_and_item();
-    }
-};
-std::vector<void**> TraceStack::free_chunks;
 
 void registerPermanentRoot(void* obj, bool allow_duplicates) {
     assert(GC.global_heap.getAllocationFromInteriorPointer(obj));
@@ -175,13 +91,13 @@ bool isNonheapRoot(void* p) {
 }
 
 bool isValidGCMemory(void* p) {
-    return isNonheapRoot(p) || (global_heap.getAllocationFromInteriorPointer(p)->user_data == p);
+    return isNonheapRoot(p) || (GC.global_heap.getAllocationFromInteriorPointer(p)->user_data == p);
 }
 
 bool isValidGCObject(void* p) {
     if (isNonheapRoot(p))
         return true;
-    GCAllocation* al = global_heap.getAllocationFromInteriorPointer(p);
+    GCAllocation* al = GC.global_heap.getAllocationFromInteriorPointer(p);
     if (!al)
         return false;
     return al->user_data == p && (al->kind_id == GCKind::CONSERVATIVE_PYTHON || al->kind_id == GCKind::PYTHON);

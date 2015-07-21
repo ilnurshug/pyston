@@ -318,5 +318,6 @@ void pyston::gc::MarkSweepGC::sweepPhase(std::vector<Box *> &weakly_referenced) 
     sc_us.log(us);
 }
 
+pyston::gc::MarkSweepGC GC;
 
 

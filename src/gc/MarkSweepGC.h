@@ -17,6 +17,7 @@
 namespace pyston{
     namespace gc{
         class MarkSweepGC;
+        extern MarkSweepGC GC;
     }
 
     class gc::MarkSweepGC : public gc::GCBase {
