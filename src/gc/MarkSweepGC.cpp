@@ -261,7 +261,7 @@ void pyston::gc::MarkSweepGC::markPhase() {
 
     GC_TRACE_LOG("Looking at roots\n");
     TraceStack stack(roots);
-    GCVisitor visitor(&stack);
+    GCVisitor visitor(&stack, &global_heap);
 
     markRoots(visitor);
 

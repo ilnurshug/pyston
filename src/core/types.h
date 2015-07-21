@@ -41,13 +41,15 @@ namespace pyston {
 namespace gc {
 
 class TraceStack;
+    class Heap;
 class GCVisitor {
 private:
     bool isValid(void* p);
 
 public:
     TraceStack* stack;
-    GCVisitor(TraceStack* stack) : stack(stack) {}
+    Heap* global_heap;
+    GCVisitor(TraceStack* stack, Heap* global_heap) : stack(stack), global_heap(global_heap) {}
 
     // These all work on *user* pointers, ie pointers to the user_data section of GCAllocations
     void visitIf(void* p) {

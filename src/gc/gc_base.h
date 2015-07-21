@@ -53,76 +53,18 @@ namespace pyston {
             void** start;
             void** end;
 
-            void get_chunk() {
-                if (free_chunks.size()) {
-                    start = free_chunks.back();
-                    free_chunks.pop_back();
-                } else {
-                    start = (void**)malloc(sizeof(void*) * CHUNK_SIZE);
-                }
-
-                cur = start;
-                end = start + CHUNK_SIZE;
-            }
-            void release_chunk(void** chunk) {
-                if (free_chunks.size() == MAX_FREE_CHUNKS)
-                    free(chunk);
-                else
-                    free_chunks.push_back(chunk);
-            }
-            void pop_chunk() {
-                start = chunks.back();
-                chunks.pop_back();
-                end = start + CHUNK_SIZE;
-                cur = end;
-            }
+            void get_chunk();
+            void release_chunk(void** chunk);
+            void pop_chunk();
 
         public:
             TraceStack() { get_chunk(); }
-            TraceStack(const std::unordered_set<void*>& rhs) {
-                get_chunk();
-                for (void* p : rhs) {
-                    assert(!isMarked(GCAllocation::fromUserData(p)));
-                    push(p);
-                }
-            }
 
-            void push(void* p) {
-                GC_TRACE_LOG("Pushing %p\n", p);
-                GCAllocation* al = GCAllocation::fromUserData(p);
-                if (isMarked(al))
-                    return;
+            TraceStack(const std::unordered_set<void*>& rhs);
 
-                setMark(al);
-
-                *cur++ = p;
-                if (cur == end) {
-                    chunks.push_back(start);
-                    get_chunk();
-                }
-            }
-
-            void* pop_chunk_and_item() {
-                release_chunk(start);
-                if (chunks.size()) {
-                    pop_chunk();
-                    assert(cur == end);
-                    return *--cur; // no need for any bounds checks here since we're guaranteed we're CHUNK_SIZE from the start
-                } else {
-                    // We emptied the stack, but we should prepare a new chunk in case another item
-                    // gets added onto the stack.
-                    get_chunk();
-                    return NULL;
-                }
-            }
-
-
-            void* pop() {
-                if (cur > start)
-                    return *--cur;
-
-                return pop_chunk_and_item();
-            }
+            void push(void* p);
+            void* pop_chunk_and_item();
+            void* pop();
         };
         //std::vector<void**> TraceStack::free_chunks;
     }
