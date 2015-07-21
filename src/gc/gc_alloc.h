@@ -20,15 +20,17 @@
 #include "gc/collector.h"
 #include "gc/heap.h"
 
+#include "gc/MarkSweepGC.h"
+
 #ifndef NVALGRIND
 #include "valgrind.h"
 #endif
 
-#include "gc/MarkSweepGC.h"
-
 namespace pyston {
 
 namespace gc {
+
+    extern MarkSweepGC GC;
 
 #if STAT_ALLOCATIONS
 static StatCounter gc_alloc_bytes("gc_alloc_bytes");

@@ -6,8 +6,6 @@
 #define PYSTON_MARKSWEEPGC_H
 
 #include "gc/gc_base.h"
-#include "runtime/objmodel.h"
-#include "runtime/types.h"
 
 
 #ifndef NVALGRIND
@@ -17,7 +15,6 @@
 namespace pyston{
     namespace gc{
         class MarkSweepGC;
-        extern MarkSweepGC GC;
     }
 
     class gc::MarkSweepGC : public gc::GCBase {

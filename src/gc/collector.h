@@ -17,14 +17,12 @@
 
 #include <vector>
 
+#include <gc/gc_base.h>
 #include "core/types.h"
 
-#include "gc/MarkSweepGC.h"
 
 namespace pyston {
 namespace gc {
-    MarkSweepGC GC;
-
 
 
 // Mark this gc-allocated object as being a root, even if there are no visible references to it.

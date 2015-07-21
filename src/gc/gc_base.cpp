@@ -4,6 +4,15 @@
 
 #include "gc_base.h"
 
+#include "codegen/ast_interpreter.h"
+#include "codegen/codegen.h"
+#include "core/common.h"
+#include "core/threading.h"
+#include "core/types.h"
+#include "core/util.h"
+#include "runtime/objmodel.h"
+#include "runtime/types.h"
+
 namespace pyston {
     namespace gc {
         std::vector<void**> TraceStack::free_chunks;
@@ -84,3 +93,10 @@ namespace pyston {
         }
     }
 }
+
+using namespace pyston;
+
+std::unordered_set<BoxedClass*>         gc::GCBase::class_objects;
+std::unordered_set<void*>               gc::GCBase::roots;
+std::vector<std::pair<void*, void*>>    gc::GCBase::potential_root_ranges;
+std::unordered_set<void*>               gc::GCBase::nonheap_roots;

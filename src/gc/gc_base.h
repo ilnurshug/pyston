@@ -9,21 +9,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <list>
+#include <unordered_set>
+#include <vector>
 #include <sys/mman.h>
 
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
 
-#include "codegen/ast_interpreter.h"
-#include "codegen/codegen.h"
-#include "core/common.h"
-#include "core/threading.h"
-#include "core/types.h"
-#include "core/util.h"
 #include "gc/heap.h"
-#include "runtime/objmodel.h"
-#include "runtime/types.h"
 
 namespace pyston {
     namespace gc {

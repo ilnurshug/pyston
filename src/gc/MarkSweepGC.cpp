@@ -4,6 +4,9 @@
 
 #include "MarkSweepGC.h"
 
+#include "runtime/objmodel.h"
+#include "runtime/types.h"
+
 void *pyston::gc::MarkSweepGC::gc_alloc(size_t bytes, pyston::gc::GCKind kind_id) {
 #if EXPENSIVE_STAT_TIMERS
     // This stat timer is quite expensive, not just because this function is extremely hot,
@@ -318,6 +321,6 @@ void pyston::gc::MarkSweepGC::sweepPhase(std::vector<Box *> &weakly_referenced) 
     sc_us.log(us);
 }
 
-pyston::gc::MarkSweepGC GC;
+
 
 

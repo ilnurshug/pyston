@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #include "gc/collector.h"
+#include "gc/MarkSweepGC.h"
 
+#include "runtime/types.h"
 
 #ifndef NVALGRIND
 #include "valgrind.h"
@@ -22,13 +24,12 @@
 namespace pyston {
 namespace gc {
 
+    MarkSweepGC GC;
 
 
 #if TRACE_GC_MARKING
 FILE* trace_fp;
 #endif
-
-
 
 
 
