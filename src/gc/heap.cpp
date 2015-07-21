@@ -121,7 +121,7 @@ void _bytesAllocatedTripped() {
     runCollection();
 }
 
-Heap global_heap;
+//Heap global_heap;
 
 __attribute__((always_inline)) bool _doFree(GCAllocation* al, std::vector<Box*>* weakly_referenced) {
 #ifndef NVALGRIND
@@ -311,7 +311,7 @@ void Heap::dumpHeapStatistics(int level) {
 }
 
 void dumpHeapStatistics(int level) {
-    global_heap.dumpHeapStatistics(level);
+    //global_heap.dumpHeapStatistics(level);
 }
 
 //////
