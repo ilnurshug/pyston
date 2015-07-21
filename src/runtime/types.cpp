@@ -131,7 +131,7 @@ namespace pyston {
 
             while (start < end) {
 #if TRACE_GC_MARKING
-        if (global_heap.getAllocationFromInteriorPointer(*start)) {
+        if (global_heap->getAllocationFromInteriorPointer(*start)) {
             if (*start >= (void*)HUGE_ARENA_START)
                 GC_TRACE_LOG("Found conservative reference to huge object %p from %p\n", *start, start);
             else if (*start >= (void*)LARGE_ARENA_START && *start < (void*)HUGE_ARENA_START)

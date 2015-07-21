@@ -41,9 +41,6 @@ static void* min_nonheap_root = (void*)~0;
 
 
 
-static bool should_not_reenter_gc = false;
-
-
 void registerPermanentRoot(void* obj, bool allow_duplicates) {
     assert(GC.global_heap.getAllocationFromInteriorPointer(obj));
 
@@ -134,13 +131,13 @@ void disableGC() {
 }
 
 void startGCUnexpectedRegion() {
-    RELEASE_ASSERT(!should_not_reenter_gc, "");
-    should_not_reenter_gc = true;
+    RELEASE_ASSERT(!GC.should_not_reenter_gc, "");
+    GC.should_not_reenter_gc = true;
 }
 
 void endGCUnexpectedRegion() {
-    RELEASE_ASSERT(should_not_reenter_gc, "");
-    should_not_reenter_gc = false;
+    RELEASE_ASSERT(GC.should_not_reenter_gc, "");
+    GC.should_not_reenter_gc = false;
 }
 
 void runCollection() {
