@@ -176,6 +176,16 @@ void pyston::gc::MarkSweepGC::runCollection() {
 
     Timer _t("collecting", /*min_usec=*/10000);
 
+#if TRACE_GC_MARKING
+#if 1 // separate log file per collection
+    char tracefn_buf[80];
+    snprintf(tracefn_buf, sizeof(tracefn_buf), "gc_trace_%d.%03d.txt", getpid(), ncollections);
+    trace_fp = fopen(tracefn_buf, "w");
+#else // overwrite previous log file with each collection
+    trace_fp = fopen("gc_trace.txt", "w");
+#endif
+#endif
+
     global_heap.prepareForCollection();
 
     markPhase();
@@ -212,6 +222,11 @@ void pyston::gc::MarkSweepGC::runCollection() {
         }
         global_heap.free(GCAllocation::fromUserData(o));
     }
+
+#if TRACE_GC_MARKING
+    fclose(trace_fp);
+    trace_fp = NULL;
+#endif
 
     should_not_reenter_gc = false; // end non-reentrant section
 
