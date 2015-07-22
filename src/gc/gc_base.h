@@ -99,6 +99,9 @@ namespace pyston {
 
         Heap global_heap;
 
+        bool should_not_reenter_gc;
+        int ncollections;
+
         static std::unordered_set<BoxedClass*> class_objects;
 
         static std::unordered_set<void*> roots;

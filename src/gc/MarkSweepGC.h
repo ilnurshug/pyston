@@ -40,9 +40,6 @@ namespace pyston{
 
         virtual void enableGC() override;
 
-        bool should_not_reenter_gc;
-        int ncollections;
-
     private:
 
         void markPhase();
