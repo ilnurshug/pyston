@@ -37,8 +37,6 @@ namespace pyston{
 
         virtual void runCollection() override;
 
-        Heap* global_heap;
-
     private:
 
         void markPhase();

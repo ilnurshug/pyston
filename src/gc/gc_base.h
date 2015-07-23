@@ -106,6 +106,8 @@ namespace pyston {
         static std::vector<std::pair<void*, void*>> potential_root_ranges;
         static std::unordered_set<void*> nonheap_roots;
 
+        Heap* global_heap;
+
     protected:
         bool gc_enabled;
 

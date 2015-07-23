@@ -15,6 +15,8 @@ namespace gc {
 
 class pyston::gc::SemiSpaceGC : public GCBase {
 public:
+    SemiSpaceGC();
+
     virtual ~SemiSpaceGC() {}
 
     virtual void *gc_alloc(size_t bytes, GCKind kind_id) override;

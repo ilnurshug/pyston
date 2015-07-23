@@ -30,7 +30,8 @@ namespace pyston {
 
 namespace gc {
 
-    extern MarkSweepGC GC;
+    //extern MarkSweepGC GC;
+    GCBase* GC();
 
 #if STAT_ALLOCATIONS
 static StatCounter gc_alloc_bytes("gc_alloc_bytes");
@@ -48,15 +49,15 @@ static StatCounter gc_alloc_bytes_typed[] = {
 extern uint64_t* gc_alloc_stattimer_counter;
 #endif
 extern "C" inline void* gc_alloc(size_t bytes, GCKind kind_id) {
-    return GC.gc_alloc(bytes, kind_id);
+    return GC()->gc_alloc(bytes, kind_id);
 }
 
 extern "C" inline void* gc_realloc(void* ptr, size_t bytes) {
-    return GC.gc_realloc(ptr, bytes);
+    return GC()->gc_realloc(ptr, bytes);
 }
 
 extern "C" inline void gc_free(void* ptr) {
-    GC.gc_free(ptr);
+    GC()->gc_free(ptr);
 }
 }
 }

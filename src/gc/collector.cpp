@@ -24,8 +24,12 @@
 namespace pyston {
 namespace gc {
 
-    MarkSweepGC GC;
+    //MarkSweepGC GC;
 
+    GCBase* GC() {
+        static MarkSweepGC GC;
+        return &GC;
+    }
 
 #if TRACE_GC_MARKING
 FILE* trace_fp;
@@ -42,23 +46,23 @@ static void* min_nonheap_root = (void*)~0;
 
 
 void registerPermanentRoot(void* obj, bool allow_duplicates) {
-    assert(GC.global_heap->getAllocationFromInteriorPointer(obj));
+    assert(GC()->global_heap->getAllocationFromInteriorPointer(obj));
 
     // Check for double-registers.  Wouldn't cause any problems, but we probably shouldn't be doing them.
     if (!allow_duplicates)
-        ASSERT(GC.roots.count(obj) == 0, "Please only register roots once");
+        ASSERT(GC()->roots.count(obj) == 0, "Please only register roots once");
 
-    GC.roots.insert(obj);
+    GC()->roots.insert(obj);
 }
 
 void deregisterPermanentRoot(void* obj) {
-    assert(GC.global_heap->getAllocationFromInteriorPointer(obj));
-    ASSERT(GC.roots.count(obj), "");
-    GC.roots.erase(obj);
+    assert(GC()->global_heap->getAllocationFromInteriorPointer(obj));
+    ASSERT(GC()->roots.count(obj), "");
+    GC()->roots.erase(obj);
 }
 
 void registerPotentialRootRange(void* start, void* end) {
-    GC.potential_root_ranges.push_back(std::make_pair(start, end));
+    GC()->potential_root_ranges.push_back(std::make_pair(start, end));
 }
 
 extern "C" PyObject* PyGC_AddRoot(PyObject* obj) noexcept {
@@ -72,10 +76,10 @@ extern "C" PyObject* PyGC_AddRoot(PyObject* obj) noexcept {
 
 void registerNonheapRootObject(void* obj, int size) {
     // I suppose that things could work fine even if this were true, but why would it happen?
-    assert(GC.global_heap->getAllocationFromInteriorPointer(obj) == NULL);
-    assert(GC.nonheap_roots.count(obj) == 0);
+    assert(GC()->global_heap->getAllocationFromInteriorPointer(obj) == NULL);
+    assert(GC()->nonheap_roots.count(obj) == 0);
 
-    GC.nonheap_roots.insert(obj);
+    GC()->nonheap_roots.insert(obj);
     registerPotentialRootRange(obj, ((uint8_t*)obj) + size);
 
     max_nonheap_root = std::max(obj, max_nonheap_root);
@@ -85,17 +89,17 @@ void registerNonheapRootObject(void* obj, int size) {
 bool isNonheapRoot(void* p) {
     if (p > max_nonheap_root || p < min_nonheap_root)
         return false;
-    return GC.nonheap_roots.count(p) != 0;
+    return GC()->nonheap_roots.count(p) != 0;
 }
 
 bool isValidGCMemory(void* p) {
-    return isNonheapRoot(p) || (GC.global_heap->getAllocationFromInteriorPointer(p)->user_data == p);
+    return isNonheapRoot(p) || (GC()->global_heap->getAllocationFromInteriorPointer(p)->user_data == p);
 }
 
 bool isValidGCObject(void* p) {
     if (isNonheapRoot(p))
         return true;
-    GCAllocation* al = GC.global_heap->getAllocationFromInteriorPointer(p);
+    GCAllocation* al = GC()->global_heap->getAllocationFromInteriorPointer(p);
     if (!al)
         return false;
     return al->user_data == p && (al->kind_id == GCKind::CONSERVATIVE_PYTHON || al->kind_id == GCKind::PYTHON);
@@ -113,35 +117,35 @@ void registerPythonObject(Box* b) {
 
     assert(b->cls);
     if (PyType_Check(b)) {
-        GC.class_objects.insert((BoxedClass*)b);
+        GC()->class_objects.insert((BoxedClass*)b);
     }
 }
 
 
 bool gcIsEnabled() {
-    return GC.gcIsEnabled();
+    return GC()->gcIsEnabled();
 }
 
 void enableGC() {
-    GC.enableGC();
+    GC()->enableGC();
 }
 
 void disableGC() {
-    GC.disableGC();
+    GC()->disableGC();
 }
 
 void startGCUnexpectedRegion() {
-    RELEASE_ASSERT(!GC.should_not_reenter_gc, "");
-    GC.should_not_reenter_gc = true;
+    RELEASE_ASSERT(!GC()->should_not_reenter_gc, "");
+    GC()->should_not_reenter_gc = true;
 }
 
 void endGCUnexpectedRegion() {
-    RELEASE_ASSERT(GC.should_not_reenter_gc, "");
-    GC.should_not_reenter_gc = false;
+    RELEASE_ASSERT(GC()->should_not_reenter_gc, "");
+    GC()->should_not_reenter_gc = false;
 }
 
 void runCollection() {
-    GC.runCollection();
+    GC()->runCollection();
 }
 
 } // namespace gc

@@ -20,7 +20,10 @@ namespace gc {
 
         struct Obj {
             size_t size;
+            Obj* forward;
             GCAllocation data[0];
+
+            Obj() { forward = nullptr; }
 
             static Obj* fromAllocation(GCAllocation* alloc) {
                 char* rtn = (char*)alloc - offsetof(Obj, data);

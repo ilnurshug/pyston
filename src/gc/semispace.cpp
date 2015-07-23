@@ -3,6 +3,11 @@
 //
 
 #include "semispace.h"
+#include "gc/semispace_heap.h"
+
+pyston::gc::SemiSpaceGC::SemiSpaceGC() {
+    global_heap = new SemiSpaceHeap();
+}
 
 void *pyston::gc::SemiSpaceGC::gc_alloc(size_t bytes, pyston::gc::GCKind kind_id) {
     return nullptr;

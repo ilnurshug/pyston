@@ -31,9 +31,9 @@ pyston::gc::SemiSpaceHeap::Obj* pyston::gc::SemiSpaceHeap::_alloc(size_t size) {
 // TODO: сделать extend во время GC
 
     if ((uint8_t*)old_frontier < (uint8_t*)tospace->frontier) {
-    size_t grow_size = (size + increment - 1) & ~(increment - 1);
-    fromspace->extendMapping(grow_size);
-}
+        size_t grow_size = (size + increment - 1) & ~(increment - 1);
+        fromspace->extendMapping(grow_size);
+    }
 
 return (Obj*)obj;
 }
