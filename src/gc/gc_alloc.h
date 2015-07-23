@@ -18,7 +18,7 @@
 #include <cstdlib>
 
 #include "gc/collector.h"
-#include "gc/heap.h"
+#include "gc/default_heap.h"
 
 #include "gc/MarkSweepGC.h"
 

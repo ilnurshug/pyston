@@ -15,6 +15,18 @@
 
 namespace pyston {
     namespace gc {
+        bool GCBase::gcIsEnabled() {
+            return gc_enabled;
+        }
+
+        void GCBase::disableGC() {
+            gc_enabled = false;
+        }
+
+        void GCBase::enableGC() {
+            gc_enabled = true;
+        }
+
         std::vector<void**> TraceStack::free_chunks;
 
 

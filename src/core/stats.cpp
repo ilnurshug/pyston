@@ -17,7 +17,7 @@
 #include <algorithm>
 
 #include "core/thread_utils.h"
-#include "gc/heap.h"
+#include "gc/default_heap.h"
 
 namespace pyston {
 

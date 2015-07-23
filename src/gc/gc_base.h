@@ -17,7 +17,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "gc/heap.h"
+#include "gc/default_heap.h"
 
 namespace pyston {
     namespace gc {
@@ -93,11 +93,9 @@ namespace pyston {
 
         virtual void runCollection() = 0;
 
-        virtual bool gcIsEnabled() = 0;
-        virtual void disableGC() = 0;
-        virtual void enableGC() = 0;
-
-        Heap global_heap;
+        bool gcIsEnabled();
+        void disableGC();
+        void enableGC();
 
         bool should_not_reenter_gc;
         int ncollections;

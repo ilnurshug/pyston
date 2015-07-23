@@ -20,11 +20,14 @@ namespace pyston{
     class gc::MarkSweepGC : public gc::GCBase {
     public:
         MarkSweepGC() {
+            global_heap = new DefaultHeap();
             gc_enabled = true;
             should_not_reenter_gc = false;
             ncollections = 0;
         }
-        virtual ~MarkSweepGC() {}
+        virtual ~MarkSweepGC() {
+            delete global_heap;
+        }
 
         virtual void *gc_alloc(size_t bytes, GCKind kind_id) override;
 
@@ -34,11 +37,7 @@ namespace pyston{
 
         virtual void runCollection() override;
 
-        virtual bool gcIsEnabled() override;
-
-        virtual void disableGC() override;
-
-        virtual void enableGC() override;
+        Heap* global_heap;
 
     private:
 

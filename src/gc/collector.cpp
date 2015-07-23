@@ -42,7 +42,7 @@ static void* min_nonheap_root = (void*)~0;
 
 
 void registerPermanentRoot(void* obj, bool allow_duplicates) {
-    assert(GC.global_heap.getAllocationFromInteriorPointer(obj));
+    assert(GC.global_heap->getAllocationFromInteriorPointer(obj));
 
     // Check for double-registers.  Wouldn't cause any problems, but we probably shouldn't be doing them.
     if (!allow_duplicates)
@@ -52,7 +52,7 @@ void registerPermanentRoot(void* obj, bool allow_duplicates) {
 }
 
 void deregisterPermanentRoot(void* obj) {
-    assert(GC.global_heap.getAllocationFromInteriorPointer(obj));
+    assert(GC.global_heap->getAllocationFromInteriorPointer(obj));
     ASSERT(GC.roots.count(obj), "");
     GC.roots.erase(obj);
 }
@@ -72,7 +72,7 @@ extern "C" PyObject* PyGC_AddRoot(PyObject* obj) noexcept {
 
 void registerNonheapRootObject(void* obj, int size) {
     // I suppose that things could work fine even if this were true, but why would it happen?
-    assert(GC.global_heap.getAllocationFromInteriorPointer(obj) == NULL);
+    assert(GC.global_heap->getAllocationFromInteriorPointer(obj) == NULL);
     assert(GC.nonheap_roots.count(obj) == 0);
 
     GC.nonheap_roots.insert(obj);
@@ -89,13 +89,13 @@ bool isNonheapRoot(void* p) {
 }
 
 bool isValidGCMemory(void* p) {
-    return isNonheapRoot(p) || (GC.global_heap.getAllocationFromInteriorPointer(p)->user_data == p);
+    return isNonheapRoot(p) || (GC.global_heap->getAllocationFromInteriorPointer(p)->user_data == p);
 }
 
 bool isValidGCObject(void* p) {
     if (isNonheapRoot(p))
         return true;
-    GCAllocation* al = GC.global_heap.getAllocationFromInteriorPointer(p);
+    GCAllocation* al = GC.global_heap->getAllocationFromInteriorPointer(p);
     if (!al)
         return false;
     return al->user_data == p && (al->kind_id == GCKind::CONSERVATIVE_PYTHON || al->kind_id == GCKind::PYTHON);

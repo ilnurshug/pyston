@@ -28,7 +28,7 @@ void *pyston::gc::MarkSweepGC::gc_alloc(size_t bytes, pyston::gc::GCKind kind_id
         alloc_bytes += REDZONE_SIZE * 2;
 #endif
 
-    GCAllocation* alloc = global_heap.alloc(alloc_bytes);
+    GCAllocation* alloc = global_heap->alloc(alloc_bytes);
 
 #ifndef NVALGRIND
     VALGRIND_DISABLE_ERROR_REPORTING;
@@ -95,18 +95,18 @@ void *pyston::gc::MarkSweepGC::gc_realloc(void *ptr, size_t bytes) {
 #ifndef NVALGRIND
     if (ENABLE_REDZONES) {
         void* base = (char*)ptr - REDZONE_SIZE;
-        alloc = global_heap.realloc(GCAllocation::fromUserData(base), alloc_bytes + 2 * REDZONE_SIZE);
+        alloc = global_heap->realloc(GCAllocation::fromUserData(base), alloc_bytes + 2 * REDZONE_SIZE);
         void* rtn_base = alloc->user_data;
         rtn = (char*)rtn_base + REDZONE_SIZE;
     } else {
-        alloc = global_heap.realloc(GCAllocation::fromUserData(ptr), alloc_bytes);
+        alloc = global_heap->realloc(GCAllocation::fromUserData(ptr), alloc_bytes);
         rtn = alloc->user_data;
     }
 
     VALGRIND_FREELIKE_BLOCK(ptr, REDZONE_SIZE);
     VALGRIND_MALLOCLIKE_BLOCK(rtn, alloc_bytes, REDZONE_SIZE, true);
 #else
-    alloc = global_heap.realloc(GCAllocation::fromUserData(ptr), alloc_bytes);
+    alloc = global_heap->realloc(GCAllocation::fromUserData(ptr), alloc_bytes);
     rtn = alloc->user_data;
 #endif
 
@@ -128,31 +128,20 @@ void pyston::gc::MarkSweepGC::gc_free(void *ptr) {
 #ifndef NVALGRIND
     if (ENABLE_REDZONES) {
         void* base = (char*)ptr - REDZONE_SIZE;
-        global_heap.free(GCAllocation::fromUserData(base));
+        global_heap->free(GCAllocation::fromUserData(base));
     } else {
-        global_heap.free(GCAllocation::fromUserData(ptr));
+        global_heap->free(GCAllocation::fromUserData(ptr));
     }
     VALGRIND_FREELIKE_BLOCK(ptr, REDZONE_SIZE);
 #else
-    global_heap.free(GCAllocation::fromUserData(ptr));
+    global_heap->free(GCAllocation::fromUserData(ptr));
 #endif
-}
-
-bool pyston::gc::MarkSweepGC::gcIsEnabled() {
-    return gc_enabled;
-}
-
-void pyston::gc::MarkSweepGC::disableGC() {
-    gc_enabled = false;
-}
-
-void pyston::gc::MarkSweepGC::enableGC() {
-    gc_enabled = true;
 }
 
 void pyston::gc::MarkSweepGC::runCollection() {
     FILE *f = fopen("out.txt", "a");
     fprintf(f, "hello from runCollection (Mark-and-Sweep GC class)\n");
+    fclose(f);
 
     static StatCounter sc_us("us_gc_collections");
     static StatCounter sc("gc_collections");
@@ -186,7 +175,7 @@ void pyston::gc::MarkSweepGC::runCollection() {
 #endif
 #endif
 
-    global_heap.prepareForCollection();
+    global_heap->prepareForCollection();
 
     markPhase();
 
@@ -220,7 +209,7 @@ void pyston::gc::MarkSweepGC::runCollection() {
                     weak_references.push_back(head);
             }
         }
-        global_heap.free(GCAllocation::fromUserData(o));
+        global_heap->free(GCAllocation::fromUserData(o));
     }
 
 #if TRACE_GC_MARKING
@@ -241,7 +230,7 @@ void pyston::gc::MarkSweepGC::runCollection() {
         }
     }
 
-    global_heap.cleanupAfterCollection();
+    global_heap->cleanupAfterCollection();
 
     if (VERBOSITY("gc") >= 2)
         printf("Collection #%d done\n\n", ncollections);
@@ -276,7 +265,7 @@ void pyston::gc::MarkSweepGC::markPhase() {
 
     GC_TRACE_LOG("Looking at roots\n");
     TraceStack stack(roots);
-    GCVisitor visitor(&stack, &global_heap);
+    GCVisitor visitor(&stack, global_heap);
 
     markRoots(visitor);
 
@@ -330,7 +319,7 @@ void pyston::gc::MarkSweepGC::sweepPhase(std::vector<Box *> &weakly_referenced) 
 
     // we need to use the allocator here because these objects are referenced only here, and calling the weakref
     // callbacks could start another gc
-    global_heap.freeUnmarked(weakly_referenced);
+    global_heap->freeUnmarked(weakly_referenced);
 
     long us = _t.end();
     sc_us.log(us);

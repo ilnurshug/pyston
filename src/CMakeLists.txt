@@ -73,7 +73,6 @@ add_library(PYSTON_OBJECTS OBJECT ${OPTIONAL_SRCS}
 		deadlock_debug_helper.cpp
 		gc/collector.cpp
 		gc/gc_alloc.cpp
-		gc/heap.cpp
 		runtime/bool.cpp
 		runtime/builtin_modules/ast.cpp
 		runtime/builtin_modules/builtins.cpp
@@ -109,7 +108,7 @@ add_library(PYSTON_OBJECTS OBJECT ${OPTIONAL_SRCS}
 		runtime/tuple.cpp
 		runtime/types.cpp
 		runtime/util.cpp
-		gc/gc_base.h gc/gc_base.cpp gc/MarkSweepGC.cpp gc/MarkSweepGC.h gc/gc_base.cpp gc/gc_base.h)
+		gc/gc_base.h gc/gc_base.cpp gc/MarkSweepGC.cpp gc/MarkSweepGC.h gc/gc_base.cpp gc/gc_base.h gc/semispace.cpp gc/semispace.h gc/default_heap.cpp gc/default_heap.h gc/semispace_heap.cpp gc/semispace_heap.h gc/heap.cpp gc/heap.h)
 
 add_dependencies(PYSTON_OBJECTS copy_stdlib libunwind_patched libunwind pypa ${LLVM_LIBS})
 
