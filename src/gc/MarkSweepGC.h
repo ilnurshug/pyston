@@ -29,12 +29,6 @@ namespace pyston{
             delete global_heap;
         }
 
-        virtual void *gc_alloc(size_t bytes, GCKind kind_id) override;
-
-        virtual void *gc_realloc(void *ptr, size_t bytes) override;
-
-        virtual void gc_free(void *ptr) override;
-
         virtual void runCollection() override;
 
     private:

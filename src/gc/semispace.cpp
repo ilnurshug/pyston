@@ -5,22 +5,40 @@
 #include "semispace.h"
 #include "gc/semispace_heap.h"
 
-pyston::gc::SemiSpaceGC::SemiSpaceGC() {
-    global_heap = new SemiSpaceHeap();
-}
+namespace pyston {
+namespace gc{
 
-void *pyston::gc::SemiSpaceGC::gc_alloc(size_t bytes, pyston::gc::GCKind kind_id) {
-    return nullptr;
-}
+    SemiSpaceGC::SemiSpaceGC() {
+        global_heap = new SemiSpaceHeap();
+        gc_enabled = true;
+        should_not_reenter_gc = false;
+        ncollections = 0;
+    }
 
-void *pyston::gc::SemiSpaceGC::gc_realloc(void *ptr, size_t bytes) {
-    return nullptr;
-}
+    void SemiSpaceGC::runCollection() {
+        global_heap->prepareForCollection();
 
-void pyston::gc::SemiSpaceGC::gc_free(void *ptr) {
+        RELEASE_ASSERT(!should_not_reenter_gc, "");
+        should_not_reenter_gc = true; // begin non-reentrant section
 
-}
+        // action goes here
+        flip();
 
-void pyston::gc::SemiSpaceGC::runCollection() {
+        should_not_reenter_gc = false; // end non-reentrant section
 
-}
+        global_heap->cleanupAfterCollection();
+    }
+
+    void SemiSpaceGC::flip() {
+        auto heap = (SemiSpaceHeap*)global_heap;
+
+        std::swap(heap->tospace, heap->fromspace);
+
+
+
+    }
+
+} // namespace gc
+} // namespace pyston
+
+

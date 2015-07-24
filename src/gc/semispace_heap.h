@@ -10,13 +10,17 @@
 namespace pyston {
 namespace gc {
 
+    class SemiSpaceGC;
+
     class SemiSpaceHeap : public Heap {
     private:
         static const uintptr_t increment = 16 * 1024 * 1024;
         static const uintptr_t initial_map_size = 64 * 1024 * 1024;
 
-        Arena<SMALL_ARENA_START, ARENA_SIZE, initial_map_size, increment>* fromspace;
-        Arena<LARGE_ARENA_START, ARENA_SIZE, initial_map_size, increment>* tospace;
+        using SemiSpace = Arena<ARENA_SIZE, initial_map_size, increment>;
+
+        SemiSpace* fromspace;
+        SemiSpace* tospace;
 
         struct Obj {
             size_t size;
@@ -32,6 +36,8 @@ namespace gc {
         };
 
     public:
+        friend class SemiSpaceGC;
+
         SemiSpaceHeap();
 
         virtual ~SemiSpaceHeap();

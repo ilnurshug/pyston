@@ -12,54 +12,54 @@
 #include <sys/mman.h>
 
 namespace pyston {
-    namespace gc {
+namespace gc {
 
-        typedef uint8_t kindid_t;
-        struct GCAllocation {
-            unsigned int gc_flags : 8;
-            GCKind kind_id : 8;
-            unsigned int _reserved1 : 16;
-            unsigned int kind_data : 32;
+    typedef uint8_t kindid_t;
+    struct GCAllocation {
+        unsigned int gc_flags : 8;
+        GCKind kind_id : 8;
+        unsigned int _reserved1 : 16;
+        unsigned int kind_data : 32;
 
-            char user_data[0];
+        char user_data[0];
 
-            static GCAllocation* fromUserData(void* user_data) {
-                char* d = reinterpret_cast<char*>(user_data);
-                return reinterpret_cast<GCAllocation*>(d - offsetof(GCAllocation, user_data));
-            }
-        };
-        static_assert(sizeof(GCAllocation) <= sizeof(void*),
-                      "we should try to make sure the gc header is word-sized or smaller");
-        /*
-            Heap Interface
-        */
-        class Heap {
-        public:
-            DS_DEFINE_SPINLOCK(lock);
+        static GCAllocation* fromUserData(void* user_data) {
+            char* d = reinterpret_cast<char*>(user_data);
+            return reinterpret_cast<GCAllocation*>(d - offsetof(GCAllocation, user_data));
+        }
+    };
+    static_assert(sizeof(GCAllocation) <= sizeof(void*),
+                  "we should try to make sure the gc header is word-sized or smaller");
+    /*
+        Heap Interface
+    */
+    class Heap {
+    public:
+        DS_DEFINE_SPINLOCK(lock);
 
-            virtual ~Heap() {}
+        virtual ~Heap() {}
 
-            virtual GCAllocation* __attribute__((__malloc__)) alloc(size_t bytes) = 0;
+        virtual GCAllocation* __attribute__((__malloc__)) alloc(size_t bytes) = 0;
 
-            virtual GCAllocation* realloc(GCAllocation* alloc, size_t bytes) = 0;
+        virtual GCAllocation* realloc(GCAllocation* alloc, size_t bytes) = 0;
 
-            virtual void destructContents(GCAllocation* alloc) = 0;
+        virtual void destructContents(GCAllocation* alloc) = 0;
 
-            virtual void free(GCAllocation* alloc) = 0;
+        virtual void free(GCAllocation* alloc) = 0;
 
-            virtual GCAllocation* getAllocationFromInteriorPointer(void* ptr) = 0;
+        virtual GCAllocation* getAllocationFromInteriorPointer(void* ptr) = 0;
 
-            virtual void freeUnmarked(std::vector<Box*>& weakly_referenced) = 0;
+        virtual void freeUnmarked(std::vector<Box*>& weakly_referenced) = 0;
 
-            virtual void prepareForCollection() = 0;
+        virtual void prepareForCollection() = 0;
 
-            virtual void cleanupAfterCollection() = 0;
+        virtual void cleanupAfterCollection() = 0;
 
-            virtual void dumpHeapStatistics(int level) = 0;
-        };
+        virtual void dumpHeapStatistics(int level) = 0;
+    };
 
 
-        extern unsigned bytesAllocatedSinceCollection;
+    extern unsigned bytesAllocatedSinceCollection;
 #define ALLOCBYTES_PER_COLLECTION 10000000
         void _bytesAllocatedTripped();
 
@@ -77,13 +77,15 @@ namespace pyston {
 
 #define PAGE_SIZE 4096
 
-        template <uintptr_t arena_start, uintptr_t arena_size, uintptr_t initial_mapsize, uintptr_t increment> class Arena {
+        template <uintptr_t arena_size, uintptr_t initial_mapsize, uintptr_t increment> class Arena {
         public:
+            uintptr_t arena_start;
+
             void* cur;
             void* frontier;
             void* arena_end;
 
-            Arena() : cur((void*)arena_start), frontier((void*)arena_start), arena_end((void*)(arena_start + arena_size)) {
+            Arena(uintptr_t arena_start) : arena_start(arena_start), cur((void*)arena_start), frontier((void*)arena_start), arena_end((void*)(arena_start + arena_size)) {
                 if (initial_mapsize)
                     extendMapping(initial_mapsize);
             }
@@ -96,7 +98,7 @@ namespace pyston {
 
                 void* mrtn = mmap(frontier, size, PROT_READ | PROT_WRITE, MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
                 RELEASE_ASSERT((uintptr_t)mrtn != -1, "failed to allocate memory from OS");
-                ASSERT(mrtn == frontier, "%p %p\n", mrtn, cur);
+                        ASSERT(mrtn == frontier, "%p %p\n", mrtn, cur);
 
                 frontier = (uint8_t*)frontier + size;
             }
@@ -122,7 +124,7 @@ namespace pyston {
         constexpr uintptr_t HUGE_ARENA_START = 0x3270000000L;
 
         bool _doFree(GCAllocation* al, std::vector<Box*>* weakly_referenced);
-    }
+}
 }
 
 #endif
