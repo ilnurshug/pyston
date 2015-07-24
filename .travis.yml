@@ -1,9 +1,10 @@
 language: cpp
 
 branches:
-	only:
-		- master
-		- gc
+  only:
+    - master
+    - gc
+    - semispace
 
 compiler:
   - clang
